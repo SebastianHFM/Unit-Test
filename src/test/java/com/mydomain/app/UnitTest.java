@@ -9,6 +9,7 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,7 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class JUnitTestMockito {
+class UnitTest {
 
     @InjectMocks
     MascotaService mascotaService;
@@ -38,7 +39,7 @@ class JUnitTestMockito {
     }
 
     @Test
-    @DisplayName("Registrar mascota Nula")
+    @DisplayName("Registrar que mascota no sea Nula")
     void testRegistrarMascotaConNombreNullLanzaException(){
         Mascota mascota = new Mascota();
         mascota.setNombre(null);
@@ -48,7 +49,7 @@ class JUnitTestMockito {
     }
 
     @Test
-    @DisplayName("Registrar mascota Vacio")
+    @DisplayName("Registrar que mascota no este Vacia")
     void testRegistrarMascotaConNombreVacioLanzaException(){
         Mascota mascota = new Mascota();
         mascota.setNombre("");
@@ -99,9 +100,7 @@ class JUnitTestMockito {
         mascota.setNombre("Guardian");
         mascota.setPropietario(propietario);
 
-        //El retorno lo cambie a false para que me pida la excepcion por no tener la vacuna
         when(externalService.validarVacunas(any(Mascota.class))).thenReturn(false);
-
 
         IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
                 mascotaService.registrarMascota(mascota));
@@ -146,29 +145,54 @@ class JUnitTestMockito {
         assertEquals("Esta mascota ya está registrada.", exception.getMessage());
     }
 
+    @Test
+    @DisplayName("Confirmar que el nombre del propietario sea el mismo que se proporcionó")
+    void testValidarNombrePropietarioConNombreActual(){
+        Mascota mascota = new Mascota();
+        Propietario propietario = new Propietario("Sebastian", "Santi", "9898989898");
 
-    //Guardar en proceso
-//    @Test
-//    @DisplayName("Validar que la mascota se registre satisfactoriamente")
-//    void testMascotaRegistradaSatisfactoriamente() {
-//        Mascota mascota = new Mascota();
-//        Propietario propietario = new Propietario("Sebastian", "Santiago", "5454545454");
-//
-//        mascota.setNombre("Guardian");
-//        mascota.setId(1);
-//        mascota.setPropietario(propietario);
-//
-//        when(externalService.validarVacunas(any(Mascota.class))).thenReturn(true);
-//        when(externalService.verificarRegistroMunicipal(any(Mascota.class))).thenReturn(true);
-//        when(mascotaRepository.findById(any(Integer.class))).thenReturn(Optional.of(mascota));
-//        when(mascotaRepository.guardar(any(Mascota.class))).thenReturn(mascota);
-//
-//        IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
-//                mascotaService.registrarMascota(mascota));
-//
-//        assertEquals("Esta mascota ya está registrada.", exception.getMessage());
-//        verify(mascotaRepository, times(1)).guardar(mascota);
-//    }
-    
+        mascota.setNombre("Guardian");
+        mascota.setPropietario(propietario);
 
+        assertSame("Sebastian", propietario.getNombre());
+    }
+
+    @Test
+    @DisplayName("Guardar la mascota satisfactoriamente")
+    void testGuardarMascota() {
+        Mascota mascota = new Mascota();
+        Propietario propietario = new Propietario("Sebastian", "Santiago", "5454545454");
+
+        mascota.setNombre("Guardian");
+        mascota.setId(1);
+        mascota.setPropietario(propietario);
+
+        when(externalService.validarVacunas(any(Mascota.class))).thenReturn(true);
+        when(externalService.verificarRegistroMunicipal(any(Mascota.class))).thenReturn(true);
+        when(mascotaRepository.findById(any(Integer.class))).thenReturn(Optional.empty());
+        when(mascotaRepository.guardar(any(Mascota.class))).thenReturn(mascota);
+
+        Mascota registrada = mascotaService.registrarMascota(mascota);
+
+        assertNotNull(registrada);
+        assertEquals("Guardian", registrada.getNombre());
+        assertEquals(1, registrada.getId());
+        assertEquals(propietario, registrada.getPropietario());
+
+        ArgumentCaptor<Mascota> captura = ArgumentCaptor.forClass(Mascota.class);
+        verify(mascotaRepository, times(1)).guardar(captura.capture());
+    }
+
+    @Test
+    @DisplayName("Eliminar mascota por ID")
+    void testEliminarMascotaPorId() {
+        Mascota mascota = new Mascota();
+        mascota.setId(2);
+
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            mascotaService.eliminarMascotaPorId(2);
+        });
+        assertEquals("No se puede eliminar: No se encontró mascota con el ID proporcionado.", exception.getMessage());
+    }
 }
