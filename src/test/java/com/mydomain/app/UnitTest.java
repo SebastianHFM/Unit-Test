@@ -117,7 +117,6 @@ class UnitTest {
         mascota.setPropietario(propietario);
 
         when(externalService.validarVacunas(any(Mascota.class))).thenReturn(true);
-        //El retorno lo cambie a false para que me pida la excepcion por no tener registro municipal
         when(externalService.verificarRegistroMunicipal(any(Mascota.class))).thenReturn(false);
 
 
@@ -190,9 +189,8 @@ class UnitTest {
         mascota.setId(2);
 
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            mascotaService.eliminarMascotaPorId(2);
-        });
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+            mascotaService.eliminarMascotaPorId(2));
         assertEquals("No se puede eliminar: No se encontró mascota con el ID proporcionado.", exception.getMessage());
     }
 }

@@ -15,7 +15,5 @@ k
 ;src/main/java/com/mydomain/app/service/ExternalService.java,3\c\3cd6e9b5a95acc7495c32ec839d33781208f2e3a
 o
 ?src/main/java/com/mydomain/app/service/ExternalServiceImpl.java,a\6\a6f61499a50c6d17f847e546a8d04abb8656f67f
-d
-4src/test/java/com/mydomain/app/JUnitTestMockito.java,5\2\529d94efbeac73767f8a959cd9fc11d5b0cb4688
 \
 ,src/test/java/com/mydomain/app/UnitTest.java,3\6\360c2bbf5842d5d4b081498588f8e8755f251b82
